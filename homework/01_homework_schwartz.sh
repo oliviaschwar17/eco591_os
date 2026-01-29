@@ -3,7 +3,7 @@
 # homework 01
 ## change into raw directory
 
-cd ~/test/week_1/;
+cd ~/Users/olivia/eco591/test/week_1/;
 
 ## create subdirectories
 
@@ -22,3 +22,5 @@ mv *.csv metadata/;
 ls fastq/*fastq.gz | wc -l;
 ls fasta/*.fasta | wc -l;
 ls metadata/*.csv | wc -l
+
+echo "all done!"
