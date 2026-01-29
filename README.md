@@ -1,3 +1,5 @@
 # BIOE 591 Coursework Repository
-funky edit
-local edit
+
+This is my repository for BIOE591
+My homework assignments are in homework/
+My other work will be in bioe591_work/
