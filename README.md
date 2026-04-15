@@ -7,4 +7,4 @@ All of my work will be in **homework/**.
 There are three subfiles:
 - **reports/** (for .html reports, .txt files and .png figures)
 - **scripts/** (for script and batch files)
-- **R/** (for markdown files, R scripts, interpretations and homework answers).
+- **markdown/** (for markdown files, R scripts, interpretations and homework answers).
