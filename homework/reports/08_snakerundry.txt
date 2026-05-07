@@ -1,0 +1,86 @@
+host: tempest-login
+Building DAG of jobs...
+Job stats:
+job                count
+---------------  -------
+bwa_index              1
+faidx                  1
+bwa_map                1
+sort_bam               1
+bcftools_call          1
+vcftools_filter        1
+all                    1
+total                  7
+
+
+[Wed May  6 21:55:49 2026]
+rule bwa_index:
+    input: genome/hemoglobin_references.fasta
+    output: genome/hemoglobin_references.fasta.bwt
+    jobid: 7
+    reason: Missing output files: genome/hemoglobin_references.fasta.bwt
+    resources: tmpdir=/tmp, mem_mb=4000, mem=4 GB, mem_mib=3815, disk_mb=1000, disk=1 GB, disk_mib=954, runtime=1, slurm_partition=priority, slurm_account=priority-bioe-591-genomics
+[Wed May  6 21:55:49 2026]
+rule faidx:
+    input: genome/hemoglobin_references.fasta
+    output: genome/hemoglobin_references.fasta.fai
+    jobid: 6
+    reason: Missing output files: genome/hemoglobin_references.fasta.fai
+    resources: tmpdir=/tmp, mem_mb=4000, mem=4 GB, mem_mib=3815, disk_mb=1000, disk=1 GB, disk_mib=954, runtime=1, slurm_partition=priority, slurm_account=priority-bioe-591-genomics
+[Wed May  6 21:55:49 2026]
+rule bwa_map:
+    input: genome/hemoglobin_references.fasta, results/clean/Conirostrum_sitticolor_218848_R1_001.clean.fastq.gz, results/clean/Conirostrum_sitticolor_218848_R2_001.clean.fastq.gz, genome/hemoglobin_references.fasta.fai, genome/hemoglobin_references.fasta.bwt
+    output: mapped_reads/218848.bam
+    jobid: 4
+    reason: Missing output files: mapped_reads/218848.bam; Input files updated by another job: genome/hemoglobin_references.fasta.fai, genome/hemoglobin_references.fasta.bwt
+    wildcards: sample=218848
+    resources: tmpdir=/tmp, mem_mb=4000, mem=4 GB, mem_mib=3815, disk_mb=<TBD>, disk=<TBD>, disk_mib=<TBD>, runtime=1, slurm_partition=priority, slurm_account=priority-bioe-591-genomics
+[Wed May  6 21:55:49 2026]
+rule sort_bam:
+    input: mapped_reads/218848.bam
+    output: sorted_reads/218848.bam, sorted_reads/218848.bam.bai
+    jobid: 3
+    reason: Missing output files: sorted_reads/218848.bam, sorted_reads/218848.bam.bai; Input files updated by another job: mapped_reads/218848.bam
+    wildcards: sample=218848
+    resources: tmpdir=/tmp, mem_mb=4000, mem=4 GB, mem_mib=3815, disk_mb=<TBD>, disk=<TBD>, disk_mib=<TBD>, runtime=1, slurm_partition=priority, slurm_account=priority-bioe-591-genomics
+[Wed May  6 21:55:49 2026]
+rule bcftools_call:
+    input: genome/hemoglobin_references.fasta, sorted_reads/218848.bam, sorted_reads/218848.bam.bai
+    output: calls/218848.vcf
+    jobid: 2
+    reason: Missing output files: calls/218848.vcf; Input files updated by another job: sorted_reads/218848.bam, sorted_reads/218848.bam.bai
+    wildcards: sample=218848
+    resources: tmpdir=/tmp, mem_mb=4000, mem=4 GB, mem_mib=3815, disk_mb=<TBD>, disk=<TBD>, disk_mib=<TBD>, runtime=1, slurm_partition=priority, slurm_account=priority-bioe-591-genomics
+[Wed May  6 21:55:49 2026]
+rule vcftools_filter:
+    input: calls/218848.vcf
+    output: final/218848.vcf
+    jobid: 1
+    reason: Missing output files: final/218848.vcf; Input files updated by another job: calls/218848.vcf
+    wildcards: sample=218848
+    resources: tmpdir=/tmp, mem_mb=4000, mem=4 GB, mem_mib=3815, disk_mb=<TBD>, disk=<TBD>, disk_mib=<TBD>, runtime=1, slurm_partition=priority, slurm_account=priority-bioe-591-genomics
+[Wed May  6 21:55:49 2026]
+rule all:
+    input: final/218848.vcf
+    jobid: 0
+    reason: Input files updated by another job: final/218848.vcf
+    resources: tmpdir=/tmp, mem_mb=4000, mem=4 GB, mem_mib=3815, disk_mb=<TBD>, disk=<TBD>, disk_mib=<TBD>, runtime=1, slurm_partition=priority, slurm_account=priority-bioe-591-genomics
+Job stats:
+job                count
+---------------  -------
+bwa_index              1
+faidx                  1
+bwa_map                1
+sort_bam               1
+bcftools_call          1
+vcftools_filter        1
+all                    1
+total                  7
+
+Reasons:
+    (check individual jobs above for details)
+    input files updated by another job:
+        all, bcftools_call, bwa_map, sort_bam, vcftools_filter
+    output files have to be generated:
+        bcftools_call, bwa_index, bwa_map, faidx, sort_bam, vcftools_filter
+This was a dry-run (flag -n). The order of jobs does not reflect the order of execution.
