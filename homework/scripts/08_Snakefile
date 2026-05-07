@@ -1,0 +1,114 @@
+SAMPLES = ["218848"]
+
+rule all:
+    input:
+        expand("final/{sample}.vcf", sample=SAMPLES)
+
+# index reference
+rule faidx:
+    conda:
+        "envs/align.yaml"
+    input:
+        "genome/hemoglobin_references.fasta"
+    output:
+        "genome/hemoglobin_references.fasta.fai"
+    shell:
+        """
+        samtools faidx {input}
+        """
+
+rule bwa_index:
+    input:
+        "genome/hemoglobin_references.fasta"
+    output:
+        "genome/hemoglobin_references.fasta.bwt"
+    conda:
+        "envs/align.yaml"
+    shell:
+        """
+        bwa index {input}
+        """
+# trim reads
+rule fastp:
+    conda:
+        "envs/fastp.yaml"
+    input:
+        r1="data/Conirostrum_sitticolor_218848_R1_001.fastq.gz",
+        r2="data/Conirostrum_sitticolor_218848_R2_001.fastq.gz"
+    output:
+        r1="results/clean/Conirostrum_sitticolor_218848_R1_001.clean.fastq.gz",
+        r2="results/clean/Conirostrum_sitticolor_218848_R2_001.clean.fastq.gz"
+    shell:
+        """
+        fastp \
+        -i {input.r1} -I {input.r2} \
+        -o {output.r1} -O {output.r2}
+        """
+
+# map
+rule bwa_map:
+    conda:
+        "envs/align.yaml"
+    input:
+        ref="genome/hemoglobin_references.fasta",
+        r1="results/clean/Conirostrum_sitticolor_218848_R1_001.clean.fastq.gz",
+        r2="results/clean/Conirostrum_sitticolor_218848_R2_001.clean.fastq.gz",
+        fai="genome/hemoglobin_references.fasta.fai",
+        bwt="genome/hemoglobin_references.fasta.bwt"
+    output:
+        "mapped_reads/{sample}.bam"
+    shell:
+        """
+        bwa mem {input.ref} {input.r1} {input.r2} |
+        samtools view -Sb - > {output}
+        """
+
+# sort and index with BAM
+rule sort_bam:
+    conda:
+        "envs/align.yaml"
+    input:
+        "mapped_reads/{sample}.bam"
+    output:
+        bam="sorted_reads/{sample}.bam",
+        bai="sorted_reads/{sample}.bam.bai"
+    shell:
+        """
+        samtools sort -o {output} {input}
+        samtools index {output.bam}
+        """
+        
+# bcftools
+rule bcftools_call:
+    conda:
+        "envs/bcftools.yaml"
+    input:
+        ref="genome/hemoglobin_references.fasta",
+        bam="sorted_reads/{sample}.bam",
+        bai="sorted_reads/{sample}.bam.bai"
+    output:
+        "calls/{sample}.vcf"
+    shell:
+        """
+        bcftools mpileup -f {input.ref} {input.bam} |
+        bcftools call -mv -Ov -o {output}
+        """
+# filter variants
+rule vcftools_filter:
+    conda:
+        "envs/vcftools.yaml"
+    input:
+        "calls/{sample}.vcf"
+    output:
+        "final/{sample}.vcf"
+    shell:
+        """
+        vcftools --vcf {input} \
+        --remove-indels \
+        --max-missing-count 1 \
+        --mac 2 \
+        --minQ 40 \
+        --minDP 5 \
+        --thin 2 \
+        --recode --stdout > {output}
+        """
